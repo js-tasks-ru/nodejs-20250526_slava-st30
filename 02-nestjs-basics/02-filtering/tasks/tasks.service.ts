@@ -7,6 +7,19 @@ const TASK_STATUS_ORDER = [
   TaskStatus.COMPLETED,
 ]
 
+const getTaskComparator = (sortBy: keyof Task): (a: Task, b: Task) => number => {
+  if (sortBy === 'status') return (a, b) => {
+    const aOrder = TASK_STATUS_ORDER.indexOf(a.status);
+    const bOrder = TASK_STATUS_ORDER.indexOf(b.status);
+    return aOrder - bOrder;
+  }
+  if (sortBy === 'title') return (a, b) => {
+    if (a.title > b.title) return 1;
+    if (a.title < b.title) return -1;
+    return 0;
+  }
+}
+
 @Injectable()
 export class TasksService {
   private tasks: Task[] = [
@@ -53,12 +66,8 @@ export class TasksService {
 
     const res: Task[] = this.tasks
       .filter(({ status: taskStatus }) => !status || taskStatus === status)
-      .slice((localPage - 1) * localLimit, localLimit)
-      .sort(sortBy !== 'status' ? undefined : (a, b): number => {
-        const aOrder = TASK_STATUS_ORDER.indexOf(a.status);
-        const bOrder = TASK_STATUS_ORDER.indexOf(b.status);
-        return aOrder - bOrder;
-      })
+      .sort(getTaskComparator(sortBy))
+      .slice((localPage - 1) * localLimit, localLimit * localLimit)
     
     return res;
   }
