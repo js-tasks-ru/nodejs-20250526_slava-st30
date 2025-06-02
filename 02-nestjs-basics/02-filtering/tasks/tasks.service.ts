@@ -67,7 +67,7 @@ export class TasksService {
     const res: Task[] = this.tasks
       .filter(({ status: taskStatus }) => !status || taskStatus === status)
       .sort(getTaskComparator(sortBy))
-      .slice((localPage - 1) * localLimit, localLimit * localLimit)
+      .slice((localPage - 1) * localLimit, localPage * localLimit )
     
     return res;
   }
