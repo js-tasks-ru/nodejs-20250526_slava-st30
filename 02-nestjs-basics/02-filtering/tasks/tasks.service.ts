@@ -1,6 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { Task, TaskStatus } from "./task.model";
 
+const TASK_STATUS_ORDER = [
+  TaskStatus.PENDING,
+  TaskStatus.IN_PROGRESS,
+  TaskStatus.COMPLETED,
+]
+
 @Injectable()
 export class TasksService {
   private tasks: Task[] = [
@@ -40,5 +46,20 @@ export class TasksService {
     status?: TaskStatus,
     page?: number,
     limit?: number,
-  ): Task[] {}
+    sortBy?: keyof Task,
+  ): Task[] {
+    const localPage = page ?? 1;
+    const localLimit = limit ?? 10;
+
+    const res: Task[] = this.tasks
+      .filter(({ status: taskStatus }) => !status || taskStatus === status)
+      .slice((localPage - 1) * localLimit, localLimit)
+      .sort(sortBy !== 'status' ? undefined : (a, b): number => {
+        const aOrder = TASK_STATUS_ORDER.indexOf(a.status);
+        const bOrder = TASK_STATUS_ORDER.indexOf(b.status);
+        return aOrder - bOrder;
+      })
+    
+    return res;
+  }
 }
